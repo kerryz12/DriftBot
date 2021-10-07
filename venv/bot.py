@@ -68,15 +68,6 @@ async def trivia(ctx, *args):
     await ctx.channel.send('>>> **' + chosen[0] + '**' + '\na. ' + answers[0] + '\nb. ' +
                            answers[1] + '\nc. ' + answers[2] + '\nd. ' + answers[3])
 
-@bot.command()
-async def score(ctx, args):
-    global user_data
-    global user
-
-    for user in user_data:
-        if user.name == args:
-            await ctx.channel.send('>>> ' + user.name + '\'s score: ' + '**' + str(user.score) + '**')
-
 @bot.listen()
 async def on_message(message):
     global active_flag
@@ -112,15 +103,24 @@ async def on_message(message):
 
                 f.close()
 
-                await message.channel.send(message.author.name + " is correct!")
+                await message.channel.send(">>> " + message.author.name + " is correct!")
             else:
-                await message.channel.send("Sorry " + message.author.name + ", you have already guessed!")
+                await message.channel.send(">>> Sorry " + message.author.name + ", you have already guessed!")
         else:
             if(guessed.count(message.author.name) == 0):
                 guessed.append(message.author.name)
-                await message.channel.send("Sorry " + message.author.name + ", that is incorrect!")
+                await message.channel.send(">>> Sorry " + message.author.name + ", that is incorrect!")
             else:
-                await message.channel.send("Sorry " + message.author.name + ", you have already guessed!")
+                await message.channel.send(">>> Sorry " + message.author.name + ", you have already guessed!")
+
+@bot.command()
+async def score(ctx, args):
+    global user_data
+    global user
+
+    for user in user_data:
+        if user.name == args:
+            await ctx.channel.send('>>> ' + user.name + '\'s score: ' + '**' + str(user.score) + '**')
 
 bot.run(TOKEN)
 
