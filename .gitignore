@@ -3,3 +3,4 @@
 .idea/
 venv/scripts/
 venv/include/
+venv/pyvenv.cfg
