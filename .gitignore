@@ -1,4 +1,5 @@
 **/.env
+**/user_data.json
 .idea/
 venv/scripts/
 venv/include/
