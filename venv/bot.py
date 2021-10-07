@@ -23,9 +23,21 @@ class user:
         self.name = name
         self.score = score
 
+    def to_dict(self):
+        return {'name': self.name, 'score': self.score}
 
-data = {}
-data['users'] = []
+    def dump(self):
+        return {"user": {'name': self.name, 'score': self.score}}
+
+user_data = []
+
+with open('user_data.json', 'r') as f:
+    data = json.loads(json.load(f))
+
+    for dictionary in data:
+        user_data.append(user(dictionary['name'], dictionary['score']))
+
+f.close()
 
 #global variables
 active_flag = False
@@ -51,25 +63,55 @@ async def trivia(ctx, *args):
     for i in range(1, 5):
         answers.append(chosen[i])
 
-    random.shuffle(answers)
+    #random.shuffle(answers)
 
-    await ctx.channel.send('**' + chosen[0] + '**' + '\n- ' + answers[0] + '\n- ' +
-                           answers[1] + '\n- ' + answers[2] + '\n- ' + answers[3])
+    await ctx.channel.send('>>> **' + chosen[0] + '**' + '\na. ' + answers[0] + '\nb. ' +
+                           answers[1] + '\nc. ' + answers[2] + '\nd. ' + answers[3])
+
+@bot.command()
+async def score(ctx, args):
+    global user_data
+    global user
+
+    for user in user_data:
+        if user.name == args:
+            await ctx.channel.send('>>> ' + user.name + '\'s score: ' + '**' + str(user.score) + '**')
 
 @bot.listen()
 async def on_message(message):
     global active_flag
     global guessed
+    global user_data
+    global user
+
+    flag = True
 
     if message.author == bot.user:
         return
-    if message.content.startswith("!trivia"):
+    if message.content.startswith("!"):
         return
     if active_flag:
         if message.content.lower() == chosen[5].rstrip('\n'):
             if (guessed.count(message.author.name) == 0):
                 active_flag = False
                 guessed = []
+
+                # save user points
+                for user in user_data:
+                    if message.author.name == user.name:
+                        user.score += 1
+                        flag = False
+
+                if flag:
+                    user_data.append(user(message.author.name, 1))
+
+                with open('user_data.json', 'w') as f:
+                    user_json = [user.to_dict() for user in user_data]
+                    json_data = json.dumps(user_json)
+                    json.dump(json_data, f)
+
+                f.close()
+
                 await message.channel.send(message.author.name + " is correct!")
             else:
                 await message.channel.send("Sorry " + message.author.name + ", you have already guessed!")
